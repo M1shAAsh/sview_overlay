@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Глобальные размеры окошка S-View -->
+    <dimen name="sview_window_width">330dp</dimen>
+    <dimen name="sview_window_height">315dp</dimen>
+
+    <!-- Дополнительные общие размеры (по желанию) -->
+</resources>

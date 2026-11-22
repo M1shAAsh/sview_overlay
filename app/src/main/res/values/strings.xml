@@ -1,0 +1,24 @@
+<resources>
+    <string name="app_name">S-View Window</string>
+
+
+    <string name="sview_choose_wallpaper">Choose wallpaper</string>
+    <string name="sview_settings_title">Settings</string>
+
+
+    <string name="sview_notifications_title">Notifications</string>
+    <string name="sview_no_notifications">No Notifications</string>
+    <string name="sview_window_geometry_title">Window Geometry</string>
+    <string name="sview_width_label">Width (dp)</string>
+    <string name="sview_height_label">height (dp)</string>
+    <string name="sview_offset_x_label">Move on X</string>
+    <string name="sview_offset_y_label">Move on Y</string>
+    <string name="sview_apply">Apply</string>
+    <string name="plus" translatable="false">+</string>
+    <string name="minus" translatable="false">-</string>
+    <string name="sview_unknown_number">Unknown Number</string>
+    <string name="sview_incoming_call">Incoming call</string>
+    <string name="sview_fonts_title">Fonts and Colors</string>
+    <string name="sview_other_title">Other</string>
+    <string name="sview_add_custom_font">Add font (ttf,otf)</string>
+</resources>

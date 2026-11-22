@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FF000000">
+
+    <!-- Именно этот контейнер мы двигаем и масштабируем -->
+    <FrameLayout
+        android:id="@+id/sview_window_container"
+        android:layout_width="@dimen/sview_window_width"
+        android:layout_height="@dimen/sview_window_height"
+        android:layout_gravity="top|center_horizontal">
+
+        <ImageView
+            android:id="@+id/sview_wallpaper_image"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:importantForAccessibility="no"
+            android:scaleType="centerCrop"
+            android:src="@drawable/sview_wallpaper_default_000" />
+
+        <ViewFlipper
+            android:id="@+id/sview_view_flipper"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <include layout="@layout/page_sview_clock" />
+            <include layout="@layout/page_sview_notifications" />
+            <include layout="@layout/page_sview_settings" />
+            <include layout="@layout/page_sview_wallpapers" />
+            <include layout="@layout/page_sview_geometry" />
+            <include layout="@layout/page_sview_call" />
+            <include layout="@layout/page_sview_other" />
+            <include layout="@layout/page_sview_fonts"/>
+
+        </ViewFlipper>
+    </FrameLayout>
+</FrameLayout>

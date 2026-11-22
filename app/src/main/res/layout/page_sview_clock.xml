@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_gravity="top|center_horizontal"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="start"
+        android:orientation="vertical"
+        android:padding="4dp">
+
+        <TextClock
+            android:id="@+id/sview_clock"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:format12Hour="hh:mm"
+            android:format24Hour="HH:mm"
+            android:includeFontPadding="false"
+            android:textColor="#FFFFFFFF"
+            android:textSize="76sp" />
+
+        <TextClock
+            android:id="@+id/sview_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="0dp"
+            android:format12Hour="EEEE, d MMMM"
+            android:format24Hour="EEEE, d MMMM"
+            android:importantForAccessibility="no"
+            android:textColor="#FFFFFFFF"
+            android:textSize="18sp" />
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/btn_open_settings"
+        android:layout_width="58dp"
+        android:layout_height="58dp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:background="@drawable/bg_tw_circle_btn"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center"
+        android:importantForAccessibility="no"
+        android:padding="8dp"
+        android:src="@drawable/ic_notify_quicksettings_normal" />
+
+    <ImageView
+        android:id="@+id/btn_open_extra"
+        android:layout_width="58dp"
+        android:layout_height="58dp"
+        android:layout_alignParentBottom="true"
+        android:layout_marginEnd="12dp"
+        android:background="@drawable/bg_tw_circle_btn"
+        android:clickable="true"
+        android:focusable="true"
+        android:importantForAccessibility="no" android:padding="8dp"
+        android:scaleType="fitCenter"
+        android:src="@drawable/sview_more_hori" />
+</RelativeLayout>

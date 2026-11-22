@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">S-View Окно</string>
+
+    <string name="sview_choose_wallpaper">Выбор обоев</string>
+    <string name="sview_settings_title">Настройки</string>
+    <string name="sview_notifications_title">Уведомления</string>
+    <string name="sview_no_notifications">Нет уведомлений</string>
+    <string name="sview_window_geometry_title">Размеры окна</string>
+    <string name="sview_width_label">Ширина (dp)</string>
+    <string name="sview_height_label">Высота (dp)</string>
+    <string name="sview_offset_x_label">Сдвиг X</string>
+    <string name="sview_offset_y_label">Сдвиг Y</string>
+    <string name="sview_apply">Применить</string>
+    <string name="sview_unknown_number">Неизвестный номер</string>
+    <string name="sview_incoming_call">Входящий звонок</string>
+    <string name="sview_fonts_title">Шрифты и цвета</string>
+    <string name="sview_other_title">Другое</string>
+    <string name="sview_add_custom_font">Добавить шрифт (ttf,otf)</string>
+</resources>
