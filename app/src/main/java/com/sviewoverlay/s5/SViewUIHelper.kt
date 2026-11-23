@@ -230,6 +230,49 @@ object SViewUIHelper {
             rootView.post { renderNotifications() }
         }
 
+        fun updateBatteryInfo(intent: Intent?) {
+            if (batteryView == null || intent == null) return
+            val level = intent.getIntExtra(android.os.BatteryManager.EXTRA_LEVEL, -1)
+            val scale = intent.getIntExtra(android.os.BatteryManager.EXTRA_SCALE, -1)
+            val status = intent.getIntExtra(android.os.BatteryManager.EXTRA_STATUS, -1)
+
+            if (level >= 0 && scale > 0) {
+                val pct = (level * 100) / scale
+                val isCharging = status == android.os.BatteryManager.BATTERY_STATUS_CHARGING ||
+                        status == android.os.BatteryManager.BATTERY_STATUS_FULL
+
+                batteryView.text = if (isCharging) {
+                    "⚡ $pct% • Зарядка"
+                } else {
+                    "$pct%"
+                }
+            }
+        }
+
+        // Регистрация статуса батареи, Только при активном Overlay.
+        val batteryReceiver = object : android.content.BroadcastReceiver() {
+            override fun onReceive(c: Context?, intent: Intent?) {
+                updateBatteryInfo(intent)
+            }
+        }
+
+        rootView.addOnAttachStateChangeListener(object : View.OnAttachStateChangeListener {
+            override fun onViewAttachedToWindow(v: View) {
+                val stickyIntent = context.registerReceiver(
+                    batteryReceiver,
+                    android.content.IntentFilter(Intent.ACTION_BATTERY_CHANGED)
+                )
+                updateBatteryInfo(stickyIntent)
+            }
+
+            override fun onViewDetachedFromWindow(v: View) {
+                try {
+                    context.unregisterReceiver(batteryReceiver)
+                } catch (_: Exception) {
+                }
+            }
+        })
+
         val callStatusView = rootView.findViewById<TextView>(R.id.sview_call_status)
         val callerTextView = rootView.findViewById<TextView>(R.id.sview_caller_number)
         val callerPhotoView = rootView.findViewById<ImageView>(R.id.sview_caller_photo)
