@@ -1,7 +1,7 @@
 <div align="center">
   <img src="app_icon.png" width="128" height="128" alt="S-View Overlay Icon" />
   <h1>SView Overlay</h1>
-<p>More interesting alternative of FlipFlap, With design from TouchWiz. And that is opensource.</p>
+<p>More interesting alternative of FlipFlap, With design from TouchWiz.</p>
 </div>
 
 ## Features
