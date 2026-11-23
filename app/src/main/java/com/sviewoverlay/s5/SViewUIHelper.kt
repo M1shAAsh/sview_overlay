@@ -381,8 +381,18 @@ object SViewUIHelper {
                     telecom.endCall()
                 } catch (_: SecurityException) {
                 }
+            } else {
+                // Резервный сброс для ранних API.
+                Thread {
+                    try {
+                        Runtime.getRuntime().exec(arrayOf("su", "-c", "input keyevent 6")).waitFor()
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                }.start()
             }
         }
+
 
         // Применение шрифта.
         applyFont(context, config.fontKey, clockView, dateView)
