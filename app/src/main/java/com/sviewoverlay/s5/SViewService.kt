@@ -66,18 +66,36 @@ class SViewService : Service() {
 
         sensorThread = Thread {
             try {
-                // Открываем постоянную Root-сессию
+                // Запускаем сессию SU.
                 val suProcess = Runtime.getRuntime().exec("su")
                 val os = DataOutputStream(suProcess.outputStream)
                 val reader = BufferedReader(InputStreamReader(suProcess.inputStream))
 
-                // Переводим SELinux в Permissive, чтобы не блокировалось чтение event13
+                // Переводим SELinux в Permissive
                 os.writeBytes("setenforce 0\n")
                 os.flush()
 
+                // Поиск датчика (SW_LID...) среди /dev/input/event*
+                os.writeBytes("grep -l 'SW  (0005):' /sys/class/input/event*/device/capabilities/sw 2>/dev/null | head -n 1\n")
+                os.writeBytes("echo '---DEV_END---'\n")
+                os.flush()
+
+                var devLine: String?
+                var foundEventPath = "/dev/input/event13" // Резервный путь по умолчанию для S5
+                while (reader.readLine().also { devLine = it } != null) {
+                    if (devLine == "---DEV_END---") break
+                    val clean = devLine?.trim() ?: ""
+                    if (clean.contains("event")) {
+                        // Извлекаем имя вида "event13" из пути /sys/class/input/event13/device/...
+                        val eventName = clean.substringAfter("/sys/class/input/").substringBefore("/")
+                        if (eventName.startsWith("event")) {
+                            foundEventPath = "/dev/input/$eventName"
+                        }
+                    }
+                }
+
                 while (isMonitoring) {
-                    // Отправляем атомарный запрос состояния датчика и маркер конца ответа
-                    os.writeBytes("getevent -p /dev/input/event13 | grep 'SW  (0005):'\n")
+                    os.writeBytes("getevent -p $foundEventPath | grep 'SW  (0005):'\n")
                     os.writeBytes("echo '---END---'\n")
                     os.flush()
 
@@ -88,7 +106,7 @@ class SViewService : Service() {
                         rawResult += line
                     }
 
-                    // Если строка получена, проверяем наличие звездочки '*' (чехол закрыт)
+                    // Если есть полученное значение, Проверяем статус (event*)
                     if (rawResult.isNotEmpty()) {
                         val isClosed = rawResult.contains("*")
 
@@ -111,7 +129,7 @@ class SViewService : Service() {
                         }
                     }
 
-                    // Пауза 200 мс (5 проверок в секунду — нулевая нагрузка на CPU)
+                    // Пауза для отдыха процессора.
                     Thread.sleep(200)
                 }
 
