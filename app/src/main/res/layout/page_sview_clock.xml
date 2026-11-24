@@ -32,6 +32,48 @@
             android:importantForAccessibility="no"
             android:textColor="#FFFFFFFF"
             android:textSize="18sp" />
+
+        <LinearLayout
+            android:id="@+id/sview_battery_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <FrameLayout
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_marginEnd="6dp">
+
+                <ImageView
+                    android:id="@+id/sview_battery_fill"
+                    android:layout_width="16dp"
+                    android:layout_height="9dp"
+                    android:layout_marginStart="2.5dp"
+                    android:layout_marginTop="7dp"
+                    android:layout_marginEnd="6.5dp"
+                    android:layout_marginBottom="3.5dp"
+                    android:importantForAccessibility="no" />
+
+                <ImageView
+                    android:id="@+id/sview_battery_icon"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:importantForAccessibility="no"
+                    android:scaleType="fitXY"
+                    android:src="@drawable/battery_24px" />
+            </FrameLayout>
+
+            <!-- Текстовый статус (проценты и "Зарядка") строго справа от иконки -->
+            <TextView
+                android:id="@+id/sview_battery_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-light"
+                android:textColor="#CCFFFFFF"
+                android:textSize="14sp" />
+        </LinearLayout>
     </LinearLayout>
 
     <ImageView
