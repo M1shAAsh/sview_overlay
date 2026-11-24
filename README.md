@@ -4,7 +4,10 @@
 <p>More interesting alternative of FlipFlap, With design from TouchWiz.</p>
 </div>
 
-## Features.
+## Features
+
+
+
 * **Hardware:** Overlay can be shown, Only when cover is closed. Also, It has to autodetect a hall sensor.
 * **Tap through window!** To be able tapping, It used system setting (high touch sensitivity), And that setting working only with overlay showing (after, setting is disabled).
 * **Showing on lockscreen.** Overlay also can be shown when phone is unlock, Anв while on lockscreen.
@@ -16,12 +19,11 @@
   * Change fonts from bundled, Or select .ttf/.otf yours.
   * Also, You can change a width/height and position of window, if not fit.
 * **Launch after boot device:** Automatic start of service, After device boot (`BOOT_COMPLETED`).
-## Screenshots.
+## Screenshots
 <img width="360" height="640" alt="photo_2026-11-24_19-45-09" src="https://github.com/user-attachments/assets/6652bad1-ad0b-442f-bbfe-22d0fda90cdb" />
 <img width="360" height="640" alt="photo_2026-11-24_19-45-10" src="https://github.com/user-attachments/assets/fadc3915-cd42-4a20-8944-610213975c92" />
 
-
-## Requirements.
+## Requirements
 * **OS:** Android 7.1-8.1: Call window is limited (only root reject call).
 * Android 9+: **Full Functionality.**
 * **Root Access:** Need for getevent (show overlay) and set "high touch sensitivity" (tapping through window).
@@ -30,7 +32,7 @@
   * Access to notifications, and music  (`NotificationListenerService`).
   * Phone, Contacts - For to call window working, To your notice.
 
-## Configuration on other models (Note4+, S5+).
+## Configuration on other models (Note4+, S5+)
 * **Hall Sensor** Detect automatically after service launch (if not, go to `/dev/input/event13`).
 * **Window Geometry** - For change geometry, You can change from overlay settings, Or edit `/sdcard/Android/data/com.sviewoverlay.s5/files/user_config.json`.
 * **Your Fonts** - You can place .ttf/.otf in `/sdcard/Android/data/com.sviewoverlay.s5/files/fonts/`, or through overlay menu.
