@@ -16,7 +16,7 @@
   * Also, You can change a width/height and position of window, if default is not will fit.
 * **Launch after boot device:** Automatic start of service, After device boot (`BOOT_COMPLETED`).
 
-## Требования
+## Requirements.
 * **OS:** Android 7.1 – 9.0+ ;
 * **Root Access:** Need for getevent (show overlay) and set "high touch sensitivity" (tapping through window).
 * **Permissions to Overlay:**
@@ -30,4 +30,5 @@
 * **Your Fonts** - You can place .ttf/.otf in `/sdcard/Android/data/com.sviewoverlay.s5/files/fonts/`, or through overlay menu.
 
 ## Disclaimer.
+Through creating this project, I used **AI**. Sorry for this.
 This project was created to restore functionality and appearance, that was present in the stock firmware. Most pictures from that project belongs to **Samsung Electronics Co., Ltd.**
