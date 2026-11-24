@@ -11,7 +11,8 @@
         android:layout_height="wrap_content"
         android:gravity="start"
         android:orientation="vertical"
-        android:padding="4dp">
+        android:padding="4dp"
+        android:elevation="8dp">
 
         <TextClock
             android:id="@+id/sview_clock"
@@ -22,6 +23,10 @@
             android:includeFontPadding="false"
             android:textColor="#FFFFFFFF"
             android:textSize="76sp"
+            android:shadowColor="#CC000000"
+            android:shadowDx="0"
+            android:shadowDy="2"
+            android:shadowRadius="4"
             tools:ignore="VisualLintSystemUi" />
 
         <TextClock
@@ -33,7 +38,12 @@
             android:format24Hour="EEEE, d MMMM"
             android:importantForAccessibility="no"
             android:textColor="#FFFFFFFF"
-            android:textSize="18sp" />
+            android:textSize="18sp"
+            android:shadowColor="#CC000000"
+            android:shadowDx="0"
+            android:shadowDy="2"
+            android:shadowRadius="4"
+            />
 
         <LinearLayout
             android:id="@+id/sview_battery_container"
@@ -74,7 +84,11 @@
                 android:layout_height="wrap_content"
                 android:fontFamily="sans-serif-light"
                 android:textColor="#CCFFFFFF"
-                android:textSize="14sp" />
+                android:textSize="14sp"
+                android:shadowColor="#CC000000"
+                android:shadowDx="0"
+                android:shadowDy="2"
+                android:shadowRadius="4"/>
         </LinearLayout>
     </LinearLayout>
 

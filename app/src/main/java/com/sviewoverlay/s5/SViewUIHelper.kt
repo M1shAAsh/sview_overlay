@@ -17,9 +17,9 @@ import android.widget.LinearLayout
 import android.widget.TextClock
 import android.widget.TextView
 import android.widget.ViewFlipper
+import androidx.core.graphics.drawable.toDrawable
 import androidx.core.graphics.toColorInt
 import java.io.File
-import androidx.core.graphics.drawable.toDrawable
 import androidx.core.net.toUri
 
 object SViewUIHelper {
@@ -311,6 +311,8 @@ object SViewUIHelper {
             context.getSystemService(Context.MEDIA_SESSION_SERVICE) as android.media.session.MediaSessionManager
         val listenerComponent = android.content.ComponentName(context, SViewNotificationService::class.java)
         var activeController: android.media.session.MediaController? = null
+        var lastTrackTitle = ""
+        var hasAlbumArt = false
 
         fun updateMusicUI() {
             if (musicContainer == null) return
@@ -320,10 +322,14 @@ object SViewUIHelper {
                     state == PlaybackState.STATE_PAUSED
             val isSystemMusicPlaying = audioManager.isMusicActive
 
-            // 1. Если музыка не играет — прячем плеер и возвращаем обычные обои из конфига
+            // 1. Если музыка полностью выключена — прячем плеер и возвращаем стандартные обои
             if (!isMediaSessionActive && !isSystemMusicPlaying) {
                 musicContainer.visibility = View.GONE
-                applyWallpaper(context, wallpaperImage, config.wallpaperKey)
+                if (hasAlbumArt) {
+                    hasAlbumArt = false
+                    lastTrackTitle = ""
+                    applyWallpaper(context, wallpaperImage, config.wallpaperKey)
+                }
                 return
             }
 
@@ -333,6 +339,9 @@ object SViewUIHelper {
                 val meta = controller.metadata
                 val title = meta?.getString(MediaMetadata.METADATA_KEY_TITLE) ?: ""
                 val artist = meta?.getString(MediaMetadata.METADATA_KEY_ARTIST) ?: ""
+
+                // Если метаданные временно пустые в момент переключения трека — не трогаем текущую картинку!
+                if (meta == null && title.isEmpty()) return
 
                 musicTitleView?.text = when {
                     artist.isNotEmpty() && title.isNotEmpty() -> "$artist — $title"
@@ -345,25 +354,34 @@ object SViewUIHelper {
                     if (isPlaying) R.drawable.music_control_btn_pause_normal else R.drawable.music_control_btn_play_normal
                 )
 
-                // 2. Пытаемся достать обложку альбома из метаданных трека
                 val albumArt = meta?.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART)
                     ?: meta?.getBitmap(MediaMetadata.METADATA_KEY_ART)
 
                 if (albumArt != null) {
                     wallpaperImage.setImageBitmap(albumArt)
+                    hasAlbumArt = true
+                    lastTrackTitle = title
                 } else {
-                    // Запасной вариант: некоторые плееры (например, Spotify/Яндекс) отдают обложку по URI
                     val artUriStr = meta?.getString(MediaMetadata.METADATA_KEY_ALBUM_ART_URI)
                         ?: meta?.getString(MediaMetadata.METADATA_KEY_ART_URI)
                     if (!artUriStr.isNullOrEmpty()) {
                         try {
                             wallpaperImage.setImageURI(artUriStr.toUri())
+                            hasAlbumArt = true
+                            lastTrackTitle = title
                         } catch (_: Exception) {
+                            if (hasAlbumArt) {
+                                hasAlbumArt = false
+                                applyWallpaper(context, wallpaperImage, config.wallpaperKey)
+                            }
+                        }
+                    } else if (title.isNotEmpty() && title != lastTrackTitle) {
+                        // Новый трек точно загрузился, и у него нет обложки — возвращаем обычные обои
+                        lastTrackTitle = title
+                        if (hasAlbumArt) {
+                            hasAlbumArt = false
                             applyWallpaper(context, wallpaperImage, config.wallpaperKey)
                         }
-                    } else {
-                        // Если у трека нет обложки — оставляем обои
-                        applyWallpaper(context, wallpaperImage, config.wallpaperKey)
                     }
                 }
             } else {
@@ -371,7 +389,6 @@ object SViewUIHelper {
                 btnMusicPlayPause?.setImageResource(
                     if (isSystemMusicPlaying) R.drawable.music_control_btn_pause_normal else R.drawable.music_control_btn_play_normal
                 )
-                applyWallpaper(context, wallpaperImage, config.wallpaperKey)
             }
         }
 
