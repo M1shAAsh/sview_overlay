@@ -17,4 +17,6 @@
     <string name="sview_fonts_title">Шрифты и цвета</string>
     <string name="sview_other_title">Другое</string>
     <string name="sview_add_custom_font">Добавить шрифт (ttf,otf)</string>
+    <string name="sview_charging">Зарядка</string>
+    <string name="audio_playing">Играет аудио</string>
 </resources>
