@@ -5,6 +5,9 @@
 </div>
 
 ## Features
+
+
+
 * **Hardware:** Overlay can be shown, Only when cover is closed. Also, It has to autodetect a hall sensor.
 * **Tap through window!** To be able tapping, It used system setting (high touch sensitivity), And that setting working only with overlay showing (after, setting is disabled).
 * **Showing on lockscreen.** Overlay also can be shown when phone is unlock, Anв while on lockscreen.
@@ -16,6 +19,9 @@
   * Change fonts from bundled, Or select .ttf/.otf yours.
   * Also, You can change a width/height and position of window, if not fit.
 * **Launch after boot device:** Automatic start of service, After device boot (`BOOT_COMPLETED`).
+## Screenshots
+<img width="360" height="640" alt="photo_2026-11-24_19-45-09" src="https://github.com/user-attachments/assets/6652bad1-ad0b-442f-bbfe-22d0fda90cdb" />
+<img width="360" height="640" alt="photo_2026-11-24_19-45-10" src="https://github.com/user-attachments/assets/fadc3915-cd42-4a20-8944-610213975c92" />
 
 ## Requirements
 * **OS:** Android 7.1-8.1: Call window is limited (only root reject call).
