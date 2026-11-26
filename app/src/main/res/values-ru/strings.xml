@@ -19,4 +19,14 @@
     <string name="sview_add_custom_font">Добавить шрифт (ttf,otf)</string>
     <string name="sview_charging">Зарядка</string>
     <string name="audio_playing">Играет аудио</string>
+    <string name="mod_title">SView Overlay • Module</string>
+    <string name="mod_status_desc">Установлен как модуль, Разрешения уже выданы.</string>
+    <string name="mod_btn_restart">Перезапустить сервис</string>
+    <string name="mod_toast_restarted">Сервис перезапущен.</string>
+    <string name="mod_btn_pick_wallpaper">Выбрать обои</string>
+    <string name="mod_btn_pick_font">Добавить шрифт (ttf/otf)</string>
+    <string name="mod_chooser_wallpaper">Выберите обои.</string>
+    <string name="mod_chooser_font">Выберите шрифт.</string>
+    <string name="mod_toast_wallpaper_applied">Обои применены.</string>
+    <string name="mod_toast_font_added">Шрифт %1$s добавлен.</string>
 </resources>

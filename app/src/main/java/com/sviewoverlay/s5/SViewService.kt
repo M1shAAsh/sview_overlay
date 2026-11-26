@@ -71,22 +71,22 @@ class SViewService : Service() {
                 val os = DataOutputStream(suProcess.outputStream)
                 val reader = BufferedReader(InputStreamReader(suProcess.inputStream))
 
-                // Переводим SELinux в Permissive
+                // Переводим SELinux в Permissive.
                 os.writeBytes("setenforce 0\n")
                 os.flush()
 
-                // Поиск датчика (SW_LID...) среди /dev/input/event*
+                // Поиск SW_LID.
                 os.writeBytes("grep -l 'SW  (0005):' /sys/class/input/event*/device/capabilities/sw 2>/dev/null | head -n 1\n")
                 os.writeBytes("echo '---DEV_END---'\n")
                 os.flush()
 
                 var devLine: String?
-                var foundEventPath = "/dev/input/event13" // Резервный путь по умолчанию для S5
+                var foundEventPath = "/dev/input/event13" // Резервный путь к сенсору.
                 while (reader.readLine().also { devLine = it } != null) {
                     if (devLine == "---DEV_END---") break
                     val clean = devLine?.trim() ?: ""
                     if (clean.contains("event")) {
-                        // Извлекаем имя вида "event13" из пути /sys/class/input/event13/device/...
+                        // Извлекаем путь сенсора.
                         val eventName = clean.substringAfter("/sys/class/input/").substringBefore("/")
                         if (eventName.startsWith("event")) {
                             foundEventPath = "/dev/input/$eventName"
@@ -113,17 +113,27 @@ class SViewService : Service() {
                         // Внутри цикла while (isMonitoring) в методе startHallSensorMonitor():
                         if (isClosed != lastCoverClosedState) {
                             lastCoverClosedState = isClosed
-                            if (isClosed) {
-                                // Включаем режим перчаток и очищаем буфер результата драйвера
-                                os.writeBytes("echo 'glove_mode,1' > /sys/class/sec/tsp/cmd && cat /sys/class/sec/tsp/cmd_result > /dev/null\n")
-                                os.writeBytes("settings put system high_touch_sensitivity 1\n")
+                            val stateInt = if (isClosed) 1 else 0
+
+                            // Сообщаем контроллеру дисплея, О повышенной чуствительности.
+                            os.writeBytes("echo 'glove_mode,$stateInt' > /sys/class/sec/tsp/cmd && cat /sys/class/sec/tsp/cmd_result > /dev/null\n")
+                            os.flush()
+
+                            // Теперь сообщаем об этом системе, Через API.
+                            try {
+                                android.provider.Settings.System.putInt(
+                                    contentResolver,
+                                    "high_touch_sensitivity",
+                                    stateInt
+                                )
+                            } catch (_: Exception) {
+                                os.writeBytes("settings put system high_touch_sensitivity $stateInt\n")
                                 os.flush()
+                            }
+
+                            if (isClosed) {
                                 mainHandler.post { showOverlay() }
                             } else {
-                                // Выключаем режим перчаток и очищаем буфер результата драйвера
-                                os.writeBytes("echo 'glove_mode,0' > /sys/class/sec/tsp/cmd && cat /sys/class/sec/tsp/cmd_result > /dev/null\n")
-                                os.writeBytes("settings put system high_touch_sensitivity 0\n")
-                                os.flush()
                                 mainHandler.post { hideOverlay() }
                             }
                         }
@@ -142,17 +152,27 @@ class SViewService : Service() {
     }
 
     private fun setHeadsUpEnabled(enabled: Boolean) {
-        val value = if (enabled) "1" else "0"
-        Thread {
-            try {
-                // Используем ваш существующий или быстрый su-вызов для мгновенного отключения всплывашек
-                val process = Runtime.getRuntime().exec(arrayOf("su", "-c", "settings put global heads_up_notifications_enabled $value"))
-                process.waitFor()
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }.start()
+        val value = if (enabled) 1 else 0
+        try {
+            android.provider.Settings.Global.putInt(
+                contentResolver,
+                "heads_up_notifications_enabled",
+                value
+            )
+        } catch (_: Exception) {
+            // Запасной запрет, Если записать настройку не удалось.
+            Thread {
+                try {
+                    Runtime.getRuntime().exec(
+                        arrayOf("su", "-c", "settings put global heads_up_notifications_enabled $value")
+                    ).waitFor()
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }.start()
+        }
     }
+
 
 
     @Suppress("DEPRECATION")

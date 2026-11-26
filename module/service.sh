@@ -11,6 +11,8 @@ sleep 3
 
 # Grant permissions
 appops set $PKG SYSTEM_ALERT_WINDOW allow
+appops set $PKG WRITE_SETTINGS allow 2>/dev/null
+pm grant $PKG android.permission.WRITE_SECURE_SETTINGS 2>/dev/null
 pm grant $PKG android.permission.READ_PHONE_STATE 2>/dev/null
 pm grant $PKG android.permission.READ_CALL_LOG 2>/dev/null
 pm grant $PKG android.permission.READ_CONTACTS 2>/dev/null

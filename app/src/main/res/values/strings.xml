@@ -1,11 +1,7 @@
 <resources>
     <string name="app_name">S-View Window</string>
-
-
     <string name="sview_choose_wallpaper">Choose wallpaper</string>
     <string name="sview_settings_title">Settings</string>
-
-
     <string name="sview_notifications_title">Notifications</string>
     <string name="sview_no_notifications">No Notifications</string>
     <string name="sview_window_geometry_title">Window Geometry</string>
@@ -23,4 +19,16 @@
     <string name="sview_add_custom_font">Add font (ttf,otf)</string>
     <string name="sview_charging">Charging</string>
     <string name="audio_playing">Audio Playing</string>
+    <!-- System Module MainActivity -->
+    <string name="mod_title">SView Overlay • System Module</string>
+    <string name="mod_status_desc">Installed from module, Permissions already granted.</string>
+    <string name="mod_btn_restart">Restart service</string>
+    <string name="mod_toast_restarted">Service restarted.</string>
+    <string name="mod_btn_pick_wallpaper">Select Wallpaper</string>
+    <string name="mod_btn_pick_font">Add Custom Font (.ttf / .otf)</string>
+    <string name="mod_chooser_wallpaper">Select Wallpaper</string>
+    <string name="mod_chooser_font">Select Font (.ttf / .otf)</string>
+    <string name="mod_toast_wallpaper_applied">Custom wallpaper applied</string>
+    <string name="mod_toast_font_added">Font %1$s added</string>
+
 </resources>

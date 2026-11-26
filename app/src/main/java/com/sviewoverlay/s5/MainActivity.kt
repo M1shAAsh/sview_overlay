@@ -1,122 +1,109 @@
 package com.sviewoverlay.s5
 
+import android.app.Activity
+import android.content.Context
 import android.content.Intent
+import android.graphics.Color
+import android.graphics.Typeface
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.provider.Settings
+import android.provider.OpenableColumns
+import android.view.Gravity
+import android.widget.Button
+import android.widget.LinearLayout
+import android.widget.TextView
 import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.net.toUri
+import androidx.core.graphics.toColorInt
 import java.io.File
+import java.io.FileOutputStream
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : Activity() {
 
-    private val overlayPermissionLauncher = registerForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) {
-        if (Settings.canDrawOverlays(this)) {
-            startSViewService()
-        }
-        finish()
-    }
-
-    // Обработчик выбора картинки из галереи
-    private val pickWallpaperLauncher = registerForActivityResult(
-        ActivityResultContracts.GetContent()
-    ) { uri: Uri? ->
-        if (uri != null) {
-            saveCustomWallpaper(uri)
-        }
-        finish()
-    }
-
-    // Выбор шрифта (ttf,otf)
-    private val pickFontLauncher = registerForActivityResult(
-        ActivityResultContracts.OpenDocument()
-    ) { uri: Uri? ->
-        if (uri != null) {
-            saveCustomFont(uri)
-        }
-        finish()
-    }
-
-    private fun saveCustomFont(uri: Uri) {
-        try {
-            // Получение действительного имени файла.
-            var fileName = "custom_font_${System.currentTimeMillis()}.ttf"
-            contentResolver.query(uri, null, null, null, null)?.use { cursor ->
-                val nameIndex = cursor.getColumnIndex(android.provider.OpenableColumns.DISPLAY_NAME)
-                if (cursor.moveToFirst() && nameIndex >= 0) {
-                    val rawName = cursor.getString(nameIndex)
-                    if (!rawName.isNullOrEmpty()) fileName = rawName
-                }
-            }
-
-            // Сохранение шрифта в открытую папку.
-            val baseDir = getExternalFilesDir(null) ?: filesDir
-            val fontsDir = File(baseDir, "fonts").apply { if (!exists()) mkdirs() }
-            val destFile = File(fontsDir, fileName)
-
-            contentResolver.openInputStream(uri)?.use { input ->
-                destFile.outputStream().use { output ->
-                    input.copyTo(output)
-                }
-            }
-
-            // Запись шрифта в конфиг.
-            val config = SViewConfig.load(this)
-            config.fontKey = fileName
-            config.save(this)
-
-            // Сообщение службе, О повторном показе окна.
-            val showIntent = Intent(this, SViewService::class.java).apply { action = "ACTION_SHOW" }
-            startService(showIntent)
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-    }
+    private val PICK_WALLPAPER_REQ = 1001
+    private val PICK_FONT_REQ = 1002
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Открытие по вызову для применения - Открыть проводник с фильтрацией.
-        if (intent?.action == "ACTION_PICK_WALLPAPER") {
-            pickWallpaperLauncher.launch("image/*")
-            return
-        }
-        if (intent?.action == "ACTION_PICK_FONT") {
-            pickFontLauncher.launch(
-                arrayOf(
-                    "font/*",
-                    "application/x-font-ttf",
-                    "application/x-font-otf",
-                    "*/*"
-                )
-            )
-            return
+        // Обработка вызовов из Overlay...
+        when (intent?.action) {
+            "ACTION_PICK_WALLPAPER" -> {
+                openWallpaperPicker()
+                return
+            }
+            "ACTION_PICK_FONT" -> {
+                openFontPicker()
+                return
+            }
         }
 
-        val callPermissions = arrayOf(
-            android.Manifest.permission.READ_PHONE_STATE,
-            android.Manifest.permission.READ_CALL_LOG,
-            android.Manifest.permission.ANSWER_PHONE_CALLS
-        )
-        androidx.core.app.ActivityCompat.requestPermissions(this, callPermissions, 102)
+        // Проверяем статус сервиса.
+        startSViewService()
 
-        // Запуск из лаунчера - Проверка разрешений, Запуск сервиса.
-        if (!Settings.canDrawOverlays(this)) {
-            Toast.makeText(this, "Разрешите показ поверх других окон", Toast.LENGTH_LONG).show()
-            val permIntent = Intent(
-                Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                "package:$packageName".toUri()
-            )
-            overlayPermissionLauncher.launch(permIntent)
-        } else {
+        // Управление сервисом через меню.
+        val density = resources.displayMetrics.density
+        val pad = (20 * density).toInt()
+
+        val rootLayout = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setBackgroundColor("#121212".toColorInt())
+            setPadding(pad, pad * 2, pad, pad)
+            gravity = Gravity.CENTER_HORIZONTAL
+        }
+
+        val titleView = TextView(this).apply {
+            text = getString(R.string.mod_title)
+            textSize = 20f
+            setTextColor(Color.WHITE)
+            setTypeface(null, Typeface.BOLD)
+            gravity = Gravity.CENTER
+        }
+
+        val statusView = TextView(this).apply {
+            text = getString(R.string.mod_status_desc)
+            textSize = 14f
+            setTextColor("#B3FFFFFF".toColorInt())
+            gravity = Gravity.CENTER
+            setPadding(0, (12 * density).toInt(), 0, (24 * density).toInt())
+        }
+
+        fun makeActionButton(label: String, onClick: () -> Unit): Button {
+            return Button(this).apply {
+                text = label
+                setTextColor(Color.WHITE)
+                setBackgroundColor("#2A2A2A".toColorInt())
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                ).apply {
+                    bottomMargin = (12 * density).toInt()
+                }
+                setOnClickListener { onClick() }
+            }
+        }
+
+        val btnRestartService = makeActionButton(getString(R.string.mod_btn_restart)) {
+            stopService(Intent(this, SViewService::class.java))
             startSViewService()
-            finish()
+            Toast.makeText(this, getString(R.string.mod_toast_restarted), Toast.LENGTH_SHORT).show()
         }
+
+        val btnPickWallpaper = makeActionButton(getString(R.string.mod_btn_pick_wallpaper)) {
+            openWallpaperPicker()
+        }
+
+        val btnPickFont = makeActionButton(getString(R.string.mod_btn_pick_font)) {
+            openFontPicker()
+        }
+
+        rootLayout.addView(titleView)
+        rootLayout.addView(statusView)
+        rootLayout.addView(btnRestartService)
+        rootLayout.addView(btnPickWallpaper)
+        rootLayout.addView(btnPickFont)
+
+        setContentView(rootLayout)
     }
 
     private fun startSViewService() {
@@ -128,29 +115,79 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun saveCustomWallpaper(uri: Uri) {
-        try {
-            val targetDir = getExternalFilesDir(null) ?: filesDir
-            val file = File(targetDir, "custom_wallpaper.jpg")
-            contentResolver.openInputStream(uri)?.use { input ->
-                file.outputStream().use { output ->
-                    input.copyTo(output)
+    private fun openWallpaperPicker() {
+        val pickIntent = Intent(Intent.ACTION_GET_CONTENT).apply {
+            type = "image/*"
+            addCategory(Intent.CATEGORY_OPENABLE)
+        }
+        startActivityForResult(
+            Intent.createChooser(pickIntent, getString(R.string.mod_chooser_wallpaper)),
+            PICK_WALLPAPER_REQ
+        )
+    }
+
+    private fun openFontPicker() {
+        val pickIntent = Intent(Intent.ACTION_GET_CONTENT).apply {
+            type = "*/*"
+            addCategory(Intent.CATEGORY_OPENABLE)
+        }
+        startActivityForResult(
+            Intent.createChooser(pickIntent, getString(R.string.mod_chooser_font)),
+            PICK_FONT_REQ
+        )
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        val uri: Uri = data?.data ?: run {
+            if (intent?.action != null) finish()
+            return
+        }
+
+        if (resultCode == RESULT_OK) {
+            when (requestCode) {
+                PICK_WALLPAPER_REQ -> {
+                    val targetDir = getExternalFilesDir(null) ?: filesDir
+                    val destFile = File(targetDir, "custom_wallpaper.jpg")
+                    contentResolver.openInputStream(uri)?.use { input ->
+                        FileOutputStream(destFile).use { output -> input.copyTo(output) }
+                    }
+                    val config = SViewConfig.load(this)
+                    config.wallpaperKey = "custom"
+                    config.save(this)
+                    Toast.makeText(this, getString(R.string.mod_toast_wallpaper_applied), Toast.LENGTH_SHORT).show()
+                }
+                PICK_FONT_REQ -> {
+                    val fileName = getFileName(this, uri) ?: "custom_font.ttf"
+                    val baseDir = getExternalFilesDir(null) ?: filesDir
+                    val fontsDir = File(baseDir, "fonts").apply { mkdirs() }
+                    val destFile = File(fontsDir, fileName)
+                    contentResolver.openInputStream(uri)?.use { input ->
+                        FileOutputStream(destFile).use { output -> input.copyTo(output) }
+                    }
+                    val config = SViewConfig.load(this)
+                    config.fontKey = fileName
+                    config.save(this)
+                    Toast.makeText(this, getString(R.string.mod_toast_font_added, fileName), Toast.LENGTH_SHORT).show()
                 }
             }
-
-            // Сохраняем выбор в SViewConfig
-            val config = SViewConfig.load(this)
-            config.wallpaperKey = "custom"
-            config.save(this)
-
-            // Сообщаем службе, что картинка обновилась
-            val updateIntent = Intent(this, SViewService::class.java).apply {
-                action = "ACTION_UPDATE_WALLPAPER"
-            }
-            startService(updateIntent)
-            Toast.makeText(this, "Обои установлены!", Toast.LENGTH_SHORT).show()
-        } catch (e: Exception) {
-            Toast.makeText(this, "Ошибка загрузки фото", Toast.LENGTH_SHORT).show()
         }
+
+        if (intent?.action == "ACTION_PICK_WALLPAPER" || intent?.action == "ACTION_PICK_FONT") {
+            finish()
+        }
+    }
+
+    private fun getFileName(context: Context, uri: Uri): String? {
+        var result: String? = null
+        if (uri.scheme == "content") {
+            context.contentResolver.query(uri, null, null, null, null)?.use { cursor ->
+                if (cursor.moveToFirst()) {
+                    val idx = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                    if (idx >= 0) result = cursor.getString(idx)
+                }
+            }
+        }
+        return result ?: uri.path?.substringAfterLast('/')
     }
 }
