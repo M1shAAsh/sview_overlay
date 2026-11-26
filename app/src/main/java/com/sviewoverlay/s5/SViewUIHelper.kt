@@ -322,7 +322,7 @@ object SViewUIHelper {
                     state == PlaybackState.STATE_PAUSED
             val isSystemMusicPlaying = audioManager.isMusicActive
 
-            // 1. Если музыка полностью выключена — прячем плеер и возвращаем стандартные обои
+            // Если в уведомлениях нет аудио, Убираем плеер и обложку.
             if (!isMediaSessionActive && !isSystemMusicPlaying) {
                 musicContainer.visibility = View.GONE
                 if (hasAlbumArt) {
@@ -340,7 +340,7 @@ object SViewUIHelper {
                 val title = meta?.getString(MediaMetadata.METADATA_KEY_TITLE) ?: ""
                 val artist = meta?.getString(MediaMetadata.METADATA_KEY_ARTIST) ?: ""
 
-                // Если метаданные временно пустые в момент переключения трека — не трогаем текущую картинку!
+                // Если метаданные после переключения трека, Ещё не доступны, То оставляем обложку.
                 if (meta == null && title.isEmpty()) return
 
                 musicTitleView?.text = when {
@@ -376,7 +376,7 @@ object SViewUIHelper {
                             }
                         }
                     } else if (title.isNotEmpty() && title != lastTrackTitle) {
-                        // Новый трек точно загрузился, и у него нет обложки — возвращаем обычные обои
+                        // Аудио загруженно, Но обложки нет - Ставим обои.
                         lastTrackTitle = title
                         if (hasAlbumArt) {
                             hasAlbumArt = false
