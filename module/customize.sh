@@ -1,2 +1,4 @@
 ui_print "- Installing SView Overlay"
-ui_print "- Grant SU to "SView Overlay", And reboot."
+ui_print "- After reboot, Grant SU to 'SView Overlay'."
+set_perm_recursive $MODPATH 0 0 0755 0644
+set_perm $MODPATH/service.sh 0 0 0755
