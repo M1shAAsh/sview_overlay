@@ -60,14 +60,6 @@ class MainActivity : Activity() {
             gravity = Gravity.CENTER
         }
 
-        val statusView = TextView(this).apply {
-            text = getString(R.string.mod_status_desc)
-            textSize = 14f
-            setTextColor("#B3FFFFFF".toColorInt())
-            gravity = Gravity.CENTER
-            setPadding(0, (12 * density).toInt(), 0, (24 * density).toInt())
-        }
-
         fun makeActionButton(label: String, onClick: () -> Unit): Button {
             return Button(this).apply {
                 text = label
@@ -98,7 +90,6 @@ class MainActivity : Activity() {
         }
 
         rootLayout.addView(titleView)
-        rootLayout.addView(statusView)
         rootLayout.addView(btnRestartService)
         rootLayout.addView(btnPickWallpaper)
         rootLayout.addView(btnPickFont)

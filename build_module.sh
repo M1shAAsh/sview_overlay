@@ -29,8 +29,9 @@ if [ ! -f "$APK_PATH" ]; then
 fi
 
 echo "- Копирование APK В папку модуля"
+rm -rf module/system/priv-app/SViewOverlay
 mkdir -p module/system/priv-app/SViewOverlay
-cp "$APK_PATH" module/system/priv-app/SViewOverlay/SViewOverlay.apk
+cp "$APK_PATH" "module/system/priv-app/SViewOverlay/SViewOverlay-${VER_NAME}.apk"
 
 echo "- Упаковка модуля в ZIP."
 mkdir -p dist

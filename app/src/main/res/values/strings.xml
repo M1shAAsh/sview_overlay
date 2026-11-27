@@ -21,7 +21,6 @@
     <string name="audio_playing">Audio Playing</string>
     <!-- System Module MainActivity -->
     <string name="mod_title">SView Overlay • System Module</string>
-    <string name="mod_status_desc">Installed from module, Permissions already granted.</string>
     <string name="mod_btn_restart">Restart service</string>
     <string name="mod_toast_restarted">Service restarted.</string>
     <string name="mod_btn_pick_wallpaper">Select Wallpaper</string>
