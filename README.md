@@ -5,9 +5,6 @@
 </div>
 
 ## Features
-
-
-
 * **Hardware:** Overlay can be shown, Only when cover is closed. Also, It has to auto detect a hall sensor.
 * **Tap through window!** It use system setting (high touch sensitivity), And that setting working only with overlay showing.
 * **Showing on lock-screen.** Overlay also can be shown when phone is unlock, And while on lock-screen.
@@ -31,7 +28,13 @@
   * On other windows (`SYSTEM_ALERT_WINDOW`).
   * Access to notifications, and music  (`NotificationListenerService`).
   * Phone, Contacts - For to call window working, To your notice.
-
+## Installing from APK
+* Install APK 
+* Launch service from launcher
+* Grant SU with permissions.
+## Installing from module
+* Install module from your Root-Manager (not from recovery!), Reboot. All permissions and SU Will granted after that.
+* KernelSU Users need to grant SU manually.
 ## Configuration on other models (Note3+, S5+)
 * **Hall Sensor** Detect automatically after service launch (if not, go to `/dev/input/event13`).
 * **Window Geometry** - For change geometry, You can change from overlay settings, Or edit `/sdcard/Android/data/com.sviewoverlay.s5/files/user_config.json`.
