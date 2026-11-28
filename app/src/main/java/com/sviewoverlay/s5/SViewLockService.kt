@@ -20,6 +20,11 @@ class SViewLockService : AppCompatActivity() {
         }
     }
 
+    companion object {
+        @Volatile
+        var isRunning = false
+    }
+
     @Suppress("DEPRECATION")
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)
@@ -35,6 +40,7 @@ class SViewLockService : AppCompatActivity() {
     @Suppress("DEPRECATION")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        isRunning = true
 
         // Показ поверх экрана блокировки, И включать экран
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
@@ -73,6 +79,7 @@ class SViewLockService : AppCompatActivity() {
     }
 
     override fun onDestroy() {
+        isRunning = false
         super.onDestroy()
         try {
             unregisterReceiver(closeReceiver)

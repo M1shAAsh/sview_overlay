@@ -223,15 +223,17 @@ class SViewService : Service() {
 
     @Suppress("DEPRECATION")
     private fun showOverlay() {
-        headsUpController.suppress() // Не показываем всплывашки при активном Overlay.
+        headsUpController.suppress() // Не показываем всплывающие ока при активном Overlay.
         val keyguardManager = getSystemService(KEYGUARD_SERVICE) as android.app.KeyguardManager
 
         // Если телефон на экране блокировки - Запустить SViewLockService
         if (keyguardManager.isKeyguardLocked) {
-            val lockIntent = Intent(this, SViewLockService::class.java).apply {
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_NO_ANIMATION)
+            if (!SViewLockService.isRunning) {
+                val lockIntent = Intent(this, SViewLockService::class.java).apply {
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_NO_ANIMATION)
+                }
+                startActivity(lockIntent)
             }
-            startActivity(lockIntent)
             return
         }
 
@@ -314,7 +316,9 @@ class SViewService : Service() {
                     }
                     if (lastCoverClosedState == true) {
                         mainHandler.post {
-                            showOverlay()
+                            if (overlayView == null && !SViewLockService.isRunning) {
+                                showOverlay()
+                            }
                             onCallStateChanged?.invoke()
                         }
                     }
@@ -332,7 +336,9 @@ class SViewService : Service() {
                     }
                     if (lastCoverClosedState == true) {
                         mainHandler.post {
-                            showOverlay()
+                            if (overlayView == null && !SViewLockService.isRunning) {
+                                showOverlay()
+                            }
                             onCallStateChanged?.invoke()
                         }
                     }
