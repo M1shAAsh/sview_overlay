@@ -459,13 +459,20 @@ object SViewUIHelper {
         val muteBtn = rootView.findViewById<ImageView>(R.id.btn_call_mute)
         val rejectBtn = rootView.findViewById<View>(R.id.btn_call_reject)
         val callTimerView = rootView.findViewById<android.widget.Chronometer>(R.id.sview_call_timer)
+        var cachedCallerNumber = ""
+        var cachedContactInfo: ContactInfo? = null
 
         fun updateCallUI() {
             val active = SViewService.isRinging || SViewService.isOffhook
             if (active) {
                 val rawNumber = SViewService.currentCallerNumber
                 if (rawNumber.isNotEmpty()) {
-                    val info = getContactInfo(context, rawNumber)
+                    // Читаем фото только раз, При поступающем звонке.
+                    if (rawNumber != cachedCallerNumber || cachedContactInfo == null) {
+                        cachedCallerNumber = rawNumber
+                        cachedContactInfo = getContactInfo(context, rawNumber)
+                    }
+                    val info = cachedContactInfo!!
                     callerTextView.text = info.name
                     if (info.photo != null) {
                         callerPhotoView.setImageBitmap(info.photo)
@@ -473,12 +480,14 @@ object SViewUIHelper {
                         callerPhotoView.setImageResource(R.drawable.call_unknown_person)
                     }
                 } else {
+                    cachedCallerNumber = ""
+                    cachedContactInfo = null
                     callerTextView.text = context.getString(R.string.sview_unknown_number)
                     callerPhotoView.setImageResource(R.drawable.call_unknown_person)
                 }
 
                 if (SViewService.isRinging) {
-                    // Гудки: показываем текст статуса, прячем и останавливаем таймер
+                    // Принятие звонка: Показываем статус.
                     callStatusView.visibility = View.VISIBLE
                     callStatusView.text = context.getString(R.string.sview_incoming_call)
                     callTimerView.stop()
@@ -488,7 +497,7 @@ object SViewUIHelper {
                     speakerBtn.visibility = View.GONE
                     muteBtn.visibility = View.GONE
                 } else {
-                    // Идёт разговор (OFFHOOK): прячем текст и запускаем живой таймер с точной точки старта
+                    // Идёт разговор (OFFHOOK): прячем текст и запускаем таймер.
                     callStatusView.visibility = View.GONE
                     callTimerView.visibility = View.VISIBLE
                     callTimerView.base = if (SViewService.callStartTime > 0L) {
@@ -512,7 +521,9 @@ object SViewUIHelper {
                 }
                 viewFlipper.displayedChild = 5
             } else {
-                // Звонок завершён: обязательно останавливаем Chronometer, чтобы не тратил батарею
+                // Сбрасываем кэш и останавливаем таймер при завершения звонка.
+                cachedCallerNumber = ""
+                cachedContactInfo = null
                 callTimerView.stop()
                 if (viewFlipper.displayedChild == 5) {
                     viewFlipper.displayedChild = 0
