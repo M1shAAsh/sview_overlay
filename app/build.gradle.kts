@@ -10,8 +10,8 @@ android {
         applicationId = "com.sviewoverlay.s5"
         minSdk = 25
         targetSdk = 28
-        versionCode = 2
-        versionName = "0.2.0"
+        versionCode = 4
+        versionName = "0.3.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
