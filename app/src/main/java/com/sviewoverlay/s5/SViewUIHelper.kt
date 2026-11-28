@@ -459,13 +459,22 @@ object SViewUIHelper {
         val muteBtn = rootView.findViewById<ImageView>(R.id.btn_call_mute)
         val rejectBtn = rootView.findViewById<View>(R.id.btn_call_reject)
         val callTimerView = rootView.findViewById<android.widget.Chronometer>(R.id.sview_call_timer)
+        var isSpeakerActive = audioManager.isSpeakerphoneOn
+        var isMuteActive = audioManager.isMicrophoneMute
+        var cachedCallerNumber = ""
+        var cachedContactInfo: ContactInfo? = null
 
         fun updateCallUI() {
             val active = SViewService.isRinging || SViewService.isOffhook
             if (active) {
                 val rawNumber = SViewService.currentCallerNumber
                 if (rawNumber.isNotEmpty()) {
-                    val info = getContactInfo(context, rawNumber)
+                    // Читаем фото только раз, При поступающем звонке.
+                    if (rawNumber != cachedCallerNumber || cachedContactInfo == null) {
+                        cachedCallerNumber = rawNumber
+                        cachedContactInfo = getContactInfo(context, rawNumber)
+                    }
+                    val info = cachedContactInfo!!
                     callerTextView.text = info.name
                     if (info.photo != null) {
                         callerPhotoView.setImageBitmap(info.photo)
@@ -473,12 +482,14 @@ object SViewUIHelper {
                         callerPhotoView.setImageResource(R.drawable.call_unknown_person)
                     }
                 } else {
+                    cachedCallerNumber = ""
+                    cachedContactInfo = null
                     callerTextView.text = context.getString(R.string.sview_unknown_number)
                     callerPhotoView.setImageResource(R.drawable.call_unknown_person)
                 }
 
                 if (SViewService.isRinging) {
-                    // Гудки: показываем текст статуса, прячем и останавливаем таймер
+                    // Принятие звонка: Показываем статус.
                     callStatusView.visibility = View.VISIBLE
                     callStatusView.text = context.getString(R.string.sview_incoming_call)
                     callTimerView.stop()
@@ -488,7 +499,7 @@ object SViewUIHelper {
                     speakerBtn.visibility = View.GONE
                     muteBtn.visibility = View.GONE
                 } else {
-                    // Идёт разговор (OFFHOOK): прячем текст и запускаем живой таймер с точной точки старта
+                    // Идёт разговор (OFFHOOK): прячем текст и запускаем таймер.
                     callStatusView.visibility = View.GONE
                     callTimerView.visibility = View.VISIBLE
                     callTimerView.base = if (SViewService.callStartTime > 0L) {
@@ -501,18 +512,12 @@ object SViewUIHelper {
                     answerBtn.visibility = View.GONE
                     speakerBtn.visibility = View.VISIBLE
                     muteBtn.visibility = View.VISIBLE
-
-                    speakerBtn.setImageResource(
-                        if (audioManager.isSpeakerphoneOn) R.drawable.during_call_btn_speaker_normal_on else R.drawable.during_call_btn_speaker_normal
-                    )
-
-                    muteBtn.setImageResource(
-                        if (audioManager.isMicrophoneMute) R.drawable.during_call_btn_mute_normal_on else R.drawable.during_call_btn_mute_normal
-                    )
                 }
                 viewFlipper.displayedChild = 5
             } else {
-                // Звонок завершён: обязательно останавливаем Chronometer, чтобы не тратил батарею
+                // Сбрасываем кэш и останавливаем таймер при завершения звонка.
+                cachedCallerNumber = ""
+                cachedContactInfo = null
                 callTimerView.stop()
                 if (viewFlipper.displayedChild == 5) {
                     viewFlipper.displayedChild = 0
@@ -523,16 +528,36 @@ object SViewUIHelper {
         updateCallUI()
         SViewService.onCallStateChanged = { updateCallUI() }
 
-        // Переключение громкой связи.
+        fun updateAudioIcons() {
+            speakerBtn.setImageResource(
+                if (isSpeakerActive) R.drawable.during_call_btn_speaker_normal_on
+                else R.drawable.during_call_btn_speaker_normal
+            )
+            muteBtn.setImageResource(
+                if (isMuteActive) R.drawable.during_call_btn_mute_normal_on
+                else R.drawable.during_call_btn_mute_normal
+            )
+        }
+        // Переключение громкой связи
         speakerBtn.setOnClickListener {
-            audioManager.isSpeakerphoneOn = !audioManager.isSpeakerphoneOn
-            updateCallUI()
+            isSpeakerActive = !isSpeakerActive
+            audioManager.isSpeakerphoneOn = isSpeakerActive
+            updateAudioIcons()
         }
 
-        // Переключение микрофона.
+        // Переключение микрофона с защитой от сброса
         muteBtn.setOnClickListener {
-            audioManager.isMicrophoneMute = !audioManager.isMicrophoneMute
-            updateCallUI()
+            isMuteActive = !isMuteActive
+            audioManager.isMicrophoneMute = isMuteActive
+            updateAudioIcons()
+
+            // Если динамик был включен - То ждём, И принудительно опять включаем его.
+            if (isSpeakerActive) {
+                rootView.postDelayed({
+                    audioManager.isSpeakerphoneOn = false
+                    audioManager.isSpeakerphoneOn = true
+                }, 80L)
+            }
         }
 
         // Принять вызов.

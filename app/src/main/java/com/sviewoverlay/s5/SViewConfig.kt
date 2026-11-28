@@ -4,9 +4,9 @@ import android.content.Context
 import org.json.JSONObject
 import java.io.File
 
-// Модель конфигурации (удобная переменная со всеми параметрами)
+// Модель конфигурации.
 data class SViewConfig(
-    var widthDp: Int = 330,
+    var widthDp: Int = 350,
     var heightDp: Int = 315,
     var marginTopDp: Int = 0,
     var marginStartDp: Int = 0,
