@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.net.toUri
 import java.io.File
 
+
 class MainActivity : AppCompatActivity() {
 
     private val overlayPermissionLauncher = registerForActivityResult(
@@ -40,6 +41,30 @@ class MainActivity : AppCompatActivity() {
             saveCustomFont(uri)
         }
         finish()
+    }
+    private val notificationAccessLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) {
+        if (isNotificationAccessEnabled()) {
+            Toast.makeText(this, "Доступ к уведомлениям включён", Toast.LENGTH_SHORT).show()
+        }
+        startSViewService()
+        finish()
+    }
+    private fun isNotificationAccessEnabled(): Boolean {
+        val enabledListeners = Settings.Secure.getString(
+            contentResolver,
+            "enabled_notification_listeners"
+        ) ?: return false
+
+        val componentName = android.content.ComponentName(
+            this,
+            SViewNotificationService::class.java
+        ).flattenToString()
+
+        return enabledListeners.split(":").any {
+            it.equals(componentName, ignoreCase = true) || it.startsWith(packageName)
+        }
     }
 
     private fun saveCustomFont(uri: Uri) {
@@ -98,11 +123,16 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
-        val callPermissions = arrayOf(
+        val callPermissions = mutableListOf(
             android.Manifest.permission.READ_PHONE_STATE,
             android.Manifest.permission.READ_CALL_LOG,
-            android.Manifest.permission.ANSWER_PHONE_CALLS
-        )
+            android.Manifest.permission.READ_CONTACTS
+        ).apply {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                add(android.Manifest.permission.ANSWER_PHONE_CALLS)
+            }
+        }.toTypedArray()
+
         androidx.core.app.ActivityCompat.requestPermissions(this, callPermissions, 102)
 
         // Запуск из лаунчера - Проверка разрешений, Запуск сервиса.
@@ -113,6 +143,13 @@ class MainActivity : AppCompatActivity() {
                 "package:$packageName".toUri()
             )
             overlayPermissionLauncher.launch(permIntent)
+        } else if (!isNotificationAccessEnabled()) {
+            Toast.makeText(
+                this,
+                "Разрешите доступ к уведомлениям для отображения в меню",
+                Toast.LENGTH_LONG
+            ).show()
+            notificationAccessLauncher.launch(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
         } else {
             startSViewService()
             finish()
