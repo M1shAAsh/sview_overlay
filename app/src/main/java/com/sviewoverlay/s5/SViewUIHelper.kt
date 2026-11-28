@@ -459,6 +459,8 @@ object SViewUIHelper {
         val muteBtn = rootView.findViewById<ImageView>(R.id.btn_call_mute)
         val rejectBtn = rootView.findViewById<View>(R.id.btn_call_reject)
         val callTimerView = rootView.findViewById<android.widget.Chronometer>(R.id.sview_call_timer)
+        var isSpeakerActive = audioManager.isSpeakerphoneOn
+        var isMuteActive = audioManager.isMicrophoneMute
         var cachedCallerNumber = ""
         var cachedContactInfo: ContactInfo? = null
 
@@ -510,14 +512,6 @@ object SViewUIHelper {
                     answerBtn.visibility = View.GONE
                     speakerBtn.visibility = View.VISIBLE
                     muteBtn.visibility = View.VISIBLE
-
-                    speakerBtn.setImageResource(
-                        if (audioManager.isSpeakerphoneOn) R.drawable.during_call_btn_speaker_normal_on else R.drawable.during_call_btn_speaker_normal
-                    )
-
-                    muteBtn.setImageResource(
-                        if (audioManager.isMicrophoneMute) R.drawable.during_call_btn_mute_normal_on else R.drawable.during_call_btn_mute_normal
-                    )
                 }
                 viewFlipper.displayedChild = 5
             } else {
@@ -534,16 +528,36 @@ object SViewUIHelper {
         updateCallUI()
         SViewService.onCallStateChanged = { updateCallUI() }
 
-        // Переключение громкой связи.
+        fun updateAudioIcons() {
+            speakerBtn.setImageResource(
+                if (isSpeakerActive) R.drawable.during_call_btn_speaker_normal_on
+                else R.drawable.during_call_btn_speaker_normal
+            )
+            muteBtn.setImageResource(
+                if (isMuteActive) R.drawable.during_call_btn_mute_normal_on
+                else R.drawable.during_call_btn_mute_normal
+            )
+        }
+        // Переключение громкой связи
         speakerBtn.setOnClickListener {
-            audioManager.isSpeakerphoneOn = !audioManager.isSpeakerphoneOn
-            updateCallUI()
+            isSpeakerActive = !isSpeakerActive
+            audioManager.isSpeakerphoneOn = isSpeakerActive
+            updateAudioIcons()
         }
 
-        // Переключение микрофона.
+        // Переключение микрофона с защитой от сброса
         muteBtn.setOnClickListener {
-            audioManager.isMicrophoneMute = !audioManager.isMicrophoneMute
-            updateCallUI()
+            isMuteActive = !isMuteActive
+            audioManager.isMicrophoneMute = isMuteActive
+            updateAudioIcons()
+
+            // Если динамик был включен - То ждём, И принудительно опять включаем его.
+            if (isSpeakerActive) {
+                rootView.postDelayed({
+                    audioManager.isSpeakerphoneOn = false
+                    audioManager.isSpeakerphoneOn = true
+                }, 80L)
+            }
         }
 
         // Принять вызов.
